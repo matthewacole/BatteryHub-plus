@@ -1,0 +1,12 @@
+node_modules/
+dist/
+backend/public/
+backend/data/
+*.db
+*.db-wal
+*.db-shm
+backend/stderr.txt
+backend/stdout.txt
+.env
+.DS_Store
+Thumbs.db
