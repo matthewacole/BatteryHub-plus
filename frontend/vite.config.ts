@@ -9,7 +9,7 @@ export default defineConfig({
     tailwindcss(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['icons/*.png', 'favicon.ico'],
+      includeAssets: ['icons/*.png', 'favicon.ico', 'apple-touch-icon.png'],
       manifest: {
         name: 'BatteryHub+',
         short_name: 'BatteryHub+',
