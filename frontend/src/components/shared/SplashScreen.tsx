@@ -17,6 +17,7 @@ export default function SplashScreen({ onDone }: { onDone: () => void }) {
     >
       <img src="icons/icon-192.png" alt="" className="w-16 h-16 mb-4" />
       <div className="text-sm font-semibold text-neutral-400 uppercase tracking-wider">BatteryHub+</div>
+      <div className="text-xs text-neutral-300 mt-1">v1.5.0</div>
     </div>
   )
 }

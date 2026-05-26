@@ -204,7 +204,7 @@ export default function BatteryCheck({ buildingFilter, onBuildingFilter, buildin
     <div className="h-full flex flex-col overflow-hidden">
       <div className="flex items-center justify-between mb-1 md:mb-2">
         <h2 className="text-lg md:text-xl font-semibold">Battery Check</h2>
-        <button onClick={printPdf} className="text-xs px-3 py-1.5 rounded-full bg-white border border-border-light text-neutral-500 hover:bg-surface-tertiary transition-colors">
+        <button onClick={printPdf} className="text-xs px-3 py-1.5 rounded-full bg-card border border-border-light text-neutral-500 hover:bg-surface-tertiary transition-colors">
           Print PDF
         </button>
       </div>
@@ -212,11 +212,11 @@ export default function BatteryCheck({ buildingFilter, onBuildingFilter, buildin
 
       {inventory && (
         <div className="flex flex-row gap-2 mb-2 md:gap-4 md:mb-4">
-          <div className="bg-white rounded-xl border border-border-light px-2 py-1 md:px-5 md:py-3 flex-1 shadow-none md:shadow-sm">
+          <div className="bg-card rounded-xl border border-border-light px-2 py-1 md:px-5 md:py-3 flex-1 shadow-none md:shadow-sm">
             <div className="text-[9px] md:text-xs text-neutral-400 uppercase tracking-wider mb-0 md:mb-1">Min</div>
             <div className="text-sm md:text-2xl font-semibold text-text-primary">{inventory.minimum}</div>
           </div>
-          <div className="bg-white rounded-xl border border-border-light px-2 py-1 md:px-5 md:py-3 flex-1 shadow-none md:shadow-sm">
+          <div className="bg-card rounded-xl border border-border-light px-2 py-1 md:px-5 md:py-3 flex-1 shadow-none md:shadow-sm">
             <div className="text-[9px] md:text-xs text-neutral-400 uppercase tracking-wider mb-0 md:mb-1">Rec</div>
             <div className="text-sm md:text-2xl font-semibold text-ai-orange">{inventory.recommended}</div>
           </div>
@@ -233,7 +233,7 @@ export default function BatteryCheck({ buildingFilter, onBuildingFilter, buildin
                 key={d}
                 onClick={() => setSelectedDate(d)}
                 className={`px-3 py-1.5 rounded-lg text-sm transition-colors ${
-                  isSelected ? 'bg-ai-blue text-white' : 'bg-white border border-border-light text-neutral-500 hover:border-ai-blue/30'
+                  isSelected ? 'bg-ai-blue text-white' : 'bg-card border border-border-light text-neutral-500 hover:border-ai-blue/30'
                 }`}
               >
                 {label}
@@ -247,7 +247,7 @@ export default function BatteryCheck({ buildingFilter, onBuildingFilter, buildin
         <button
           onClick={() => setMobileView('schedule')}
           className={`flex-1 px-3 py-1.5 text-xs rounded-md transition-colors ${
-            mobileView === 'schedule' ? 'bg-white text-text-primary shadow-sm' : 'text-neutral-500 hover:text-text-primary'
+            mobileView === 'schedule' ? 'bg-card text-text-primary shadow-sm' : 'text-neutral-500 hover:text-text-primary'
           }`}
         >
           📅 Schedule
@@ -255,7 +255,7 @@ export default function BatteryCheck({ buildingFilter, onBuildingFilter, buildin
         <button
           onClick={() => setMobileView('tasks')}
           className={`flex-1 px-3 py-1.5 text-xs rounded-md transition-colors ${
-            mobileView === 'tasks' ? 'bg-white text-text-primary shadow-sm' : 'text-neutral-500 hover:text-text-primary'
+            mobileView === 'tasks' ? 'bg-card text-text-primary shadow-sm' : 'text-neutral-500 hover:text-text-primary'
           }`}
         >
           🔍 Tasks
@@ -292,7 +292,7 @@ export default function BatteryCheck({ buildingFilter, onBuildingFilter, buildin
                       {todayTasks.map(c => {
                         const meta = REASON_LABELS[c.reason] || { icon: '•', action: c.reason }
                         return (
-                          <div key={c.id} className={`bg-white rounded-xl border px-4 py-3 flex items-center justify-between shadow-sm ${c.completed ? 'border-ai-green/30 bg-ai-green/5' : 'border-border-light'}`}>
+                          <div key={c.id} className={`bg-card rounded-xl border px-4 py-3 flex items-center justify-between shadow-sm ${c.completed ? 'border-ai-green/30 bg-ai-green/5' : 'border-border-light'}`}>
                             <div className="flex items-center gap-3 cursor-pointer" onClick={() => setSelectedCheck(c)}>
                               <span className="text-lg">{meta.icon}</span>
                               <div>
@@ -321,7 +321,7 @@ export default function BatteryCheck({ buildingFilter, onBuildingFilter, buildin
                       {yesterdaysChecks.map(c => {
                         const meta = REASON_LABELS[c.reason] || { icon: '•', action: c.reason }
                         return (
-                          <div key={c.id} className={`bg-white rounded-xl border px-4 py-3 flex items-center justify-between shadow-sm ${c.completed ? 'border-ai-green/30 bg-ai-green/5' : 'border-ai-pink/30 bg-ai-pink/5'}`}>
+                          <div key={c.id} className={`bg-card rounded-xl border px-4 py-3 flex items-center justify-between shadow-sm ${c.completed ? 'border-ai-green/30 bg-ai-green/5' : 'border-ai-pink/30 bg-ai-pink/5'}`}>
                             <div className="flex items-center gap-3">
                               <span className="text-lg">{c.completed ? '✅' : '❌'}</span>
                               <div>
@@ -370,7 +370,7 @@ export default function BatteryCheck({ buildingFilter, onBuildingFilter, buildin
                     {todayTasks.map(c => {
                       const meta = REASON_LABELS[c.reason] || { icon: '•', action: c.reason }
                       return (
-                        <div key={c.id} className={`bg-white rounded-xl border px-4 py-3 flex items-center justify-between shadow-sm ${c.completed ? 'border-ai-green/30 bg-ai-green/5' : 'border-border-light'}`}>
+                        <div key={c.id} className={`bg-card rounded-xl border px-4 py-3 flex items-center justify-between shadow-sm ${c.completed ? 'border-ai-green/30 bg-ai-green/5' : 'border-border-light'}`}>
                           <div className="flex items-center gap-3 cursor-pointer" onClick={() => setSelectedCheck(c)}>
                             <span className="text-lg">{meta.icon}</span>
                             <div>
@@ -399,7 +399,7 @@ export default function BatteryCheck({ buildingFilter, onBuildingFilter, buildin
                     {yesterdaysChecks.map(c => {
                       const meta = REASON_LABELS[c.reason] || { icon: '•', action: c.reason }
                       return (
-                        <div key={c.id} className={`bg-white rounded-xl border px-4 py-3 flex items-center justify-between shadow-sm ${c.completed ? 'border-ai-green/30 bg-ai-green/5' : 'border-ai-pink/30 bg-ai-pink/5'}`}>
+                        <div key={c.id} className={`bg-card rounded-xl border px-4 py-3 flex items-center justify-between shadow-sm ${c.completed ? 'border-ai-green/30 bg-ai-green/5' : 'border-ai-pink/30 bg-ai-pink/5'}`}>
                           <div className="flex items-center gap-3">
                             <span className="text-lg">{c.completed ? '✅' : '❌'}</span>
                             <div>

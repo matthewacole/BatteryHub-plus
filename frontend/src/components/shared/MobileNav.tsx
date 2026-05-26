@@ -10,8 +10,7 @@ const tabs: { id: Tab; label: string; icon: string }[] = [
 export default function MobileNav({ activeTab, onTabChange, forceMode }: { activeTab: Tab; onTabChange: (t: Tab) => void; forceMode: ForceMode }) {
   const hidden = forceMode === 'desktop' ? 'hidden' : forceMode === 'mobile' ? '' : 'md:hidden'
   return (
-    <nav className={`fixed bottom-0 left-0 right-0 z-50 flex items-center bg-surface/95 backdrop-blur-lg border-t border-border-light pb-[env(safe-area-inset-bottom,0px)] ${hidden}`}>
-      <img src="icons/icon-192.png" alt="" className="w-4 h-4 shrink-0 ml-2" />
+    <nav className={`fixed bottom-0 left-0 right-0 z-50 flex bg-surface/95 backdrop-blur-lg border-t border-border-light pb-[env(safe-area-inset-bottom,0px)] ${hidden}`}>
       {tabs.map(t => (
         <button
           key={t.id}

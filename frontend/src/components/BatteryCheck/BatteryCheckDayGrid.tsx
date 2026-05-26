@@ -38,7 +38,7 @@ export default function BatteryCheckDayGrid({
   for (let h = START_HOUR; h <= END_HOUR; h++) hours.push(h)
 
   return (
-    <div className="overflow-x-auto rounded-xl border border-border-light bg-white">
+    <div className="overflow-x-auto rounded-xl border border-border-light bg-card">
       <div className="grid" style={{ gridTemplateColumns: `40px repeat(${roomIds.length}, minmax(120px, 1fr))` }}>
           <div className="sticky left-0 top-0 z-20 bg-surface-secondary border-b border-r border-border-light py-1.5 text-[10px] font-medium text-neutral-400 text-center">Time</div>
           {roomIds.map(room => {
@@ -54,7 +54,7 @@ export default function BatteryCheckDayGrid({
             )
           })}
 
-          <div className="sticky left-0 z-10 bg-white">
+          <div className="sticky left-0 z-10 bg-card">
             {hours.map(h => (
               <div key={h} className="h-8 border-b border-r border-border-light pr-1 text-right text-[9px] text-neutral-400 leading-none pt-0.5">
                 {h > 0 && to12Hour(`${h}:00`)}

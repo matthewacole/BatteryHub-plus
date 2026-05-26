@@ -55,7 +55,7 @@ export default function Configure({ onManagedChange }: { onManagedChange: () => 
           const managedCount = g.rooms.filter(r => r.managed).length
           const allManaged = managedCount === g.rooms.length
           return (
-            <div key={g.building} className="bg-white rounded-xl border border-border-light overflow-hidden shadow-sm">
+            <div key={g.building} className="bg-card rounded-xl border border-border-light overflow-hidden shadow-sm">
               <div className="px-4 py-3 flex items-center justify-between bg-surface-secondary border-b border-border-light">
                 <div className="flex items-center gap-3">
                   <span className="font-medium text-sm text-text-primary">{g.building}</span>
@@ -83,7 +83,7 @@ export default function Configure({ onManagedChange }: { onManagedChange: () => 
                           <span className={`w-8 h-5 rounded-full transition-colors relative ${
                         r.managed ? 'bg-ai-green' : 'bg-neutral-200'
                       }`}>
-                        <span className={`absolute top-0.5 left-0.5 w-4 h-4 rounded-full bg-white shadow transition-transform ${
+                        <span className={`absolute top-0.5 left-0.5 w-4 h-4 rounded-full bg-card shadow transition-transform ${
                           r.managed ? 'translate-x-3' : ''
                         }`} />
                       </span>
@@ -92,7 +92,7 @@ export default function Configure({ onManagedChange }: { onManagedChange: () => 
                     <select
                       value={r.room_type}
                       onChange={e => changeRoomType(r.room_id, e.target.value)}
-                      className="text-xs px-2 py-1 rounded border border-border-light bg-white text-neutral-500"
+                      className="text-xs px-2 py-1 rounded border border-border-light bg-card text-neutral-500"
                     >
                       <option value="small">Small (4 bat)</option>
                       <option value="large">Large (6 bat)</option>

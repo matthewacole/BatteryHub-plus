@@ -96,7 +96,7 @@ export default function ClassDetails({ buildingFilter, onBuildingFilter, buildin
         <select
           value={selectedRoom}
           onChange={e => setSelectedRoom(e.target.value)}
-          className="max-w-md px-4 py-2 rounded-xl border border-border-light bg-white text-sm focus:outline-none focus:ring-2 focus:ring-ai-blue/30"
+          className="max-w-md px-4 py-2 rounded-xl border border-border-light bg-card text-sm focus:outline-none focus:ring-2 focus:ring-ai-blue/30"
         >
           {rooms.map(r => (
             <option key={r.room_id} value={r.room_id}>{r.room_id} ({r.room_type})</option>
@@ -119,15 +119,15 @@ export default function ClassDetails({ buildingFilter, onBuildingFilter, buildin
       </div>
       {roomMeta && viewMode === 'list' && (
         <div className="flex flex-col md:flex-row gap-2 md:gap-4 mb-4 md:mb-6">
-          <div className="bg-white rounded-xl border border-border-light px-3 py-2 md:px-5 md:py-3 shadow-sm">
+          <div className="bg-card rounded-xl border border-border-light px-3 py-2 md:px-5 md:py-3 shadow-sm">
             <div className="text-[10px] md:text-xs text-neutral-400 uppercase tracking-wider mb-0.5 md:mb-1">Type</div>
             <div className="text-sm md:text-base font-semibold text-text-primary">{roomMeta.room_type}</div>
           </div>
-          <div className="bg-white rounded-xl border border-border-light px-3 py-2 md:px-5 md:py-3 shadow-sm">
+          <div className="bg-card rounded-xl border border-border-light px-3 py-2 md:px-5 md:py-3 shadow-sm">
             <div className="text-[10px] md:text-xs text-neutral-400 uppercase tracking-wider mb-0.5 md:mb-1">Batteries</div>
             <div className="text-sm md:text-base font-semibold text-text-primary">{roomMeta.battery_req}</div>
           </div>
-          <div className="bg-white rounded-xl border border-border-light px-3 py-2 md:px-5 md:py-3 shadow-sm">
+          <div className="bg-card rounded-xl border border-border-light px-3 py-2 md:px-5 md:py-3 shadow-sm">
             <div className="text-[10px] md:text-xs text-neutral-400 uppercase tracking-wider mb-0.5 md:mb-1">Hours</div>
             <div className="text-sm md:text-base font-semibold text-text-primary">{totalHours.toFixed(1)}h</div>
           </div>
@@ -142,7 +142,7 @@ export default function ClassDetails({ buildingFilter, onBuildingFilter, buildin
           Object.entries(groupedByDay).sort().map(([date, entries]) => {
             const dayHours = entries.reduce((s, e) => s + e.duration_hours, 0)
             return (
-              <div key={date} className="mb-4 bg-white rounded-xl border border-border-light overflow-hidden">
+              <div key={date} className="mb-4 bg-card rounded-xl border border-border-light overflow-hidden">
                 <div className="px-4 py-2 bg-surface-secondary border-b border-border-light flex items-center justify-between">
                   <span className="font-medium text-sm text-text-primary">
                     {new Date(date + 'T12:00:00').toLocaleDateString('en', { weekday: 'long', month: 'short', day: 'numeric' })}
