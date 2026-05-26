@@ -1,4 +1,4 @@
-import type { Tab } from '../../types'
+import type { Tab, ForceMode } from '../../types'
 
 const tabs: { id: Tab; label: string; icon: string }[] = [
   { id: 'dashboard', label: 'Dashboard', icon: '◻' },
@@ -7,9 +7,10 @@ const tabs: { id: Tab; label: string; icon: string }[] = [
   { id: 'settings', label: 'Settings', icon: '⚙' },
 ]
 
-export default function MobileNav({ activeTab, onTabChange }: { activeTab: Tab; onTabChange: (t: Tab) => void }) {
+export default function MobileNav({ activeTab, onTabChange, forceMode }: { activeTab: Tab; onTabChange: (t: Tab) => void; forceMode: ForceMode }) {
+  const hidden = forceMode === 'desktop' ? 'hidden' : forceMode === 'mobile' ? '' : 'md:hidden'
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 flex md:hidden bg-surface/95 backdrop-blur-lg border-t border-border-light pb-[env(safe-area-inset-bottom,0px)]">
+    <nav className={`fixed bottom-0 left-0 right-0 z-50 flex bg-surface/95 backdrop-blur-lg border-t border-border-light pb-[env(safe-area-inset-bottom,0px)] ${hidden}`}>
       {tabs.map(t => (
         <button
           key={t.id}

@@ -207,7 +207,7 @@ export default function BatteryCheck({ buildingFilter, onBuildingFilter, buildin
       <BuildingFilter active={buildingFilter} onChange={onBuildingFilter} buildings={buildings} />
 
       {inventory && (
-        <div className="flex gap-4 mb-4">
+        <div className="flex flex-col md:flex-row gap-4 mb-4">
           <div className="bg-white rounded-xl border border-border-light px-5 py-3 flex-1 shadow-sm">
             <div className="text-xs text-neutral-400 uppercase tracking-wider mb-1">Minimum Batteries</div>
             <div className="text-2xl font-semibold text-text-primary">{inventory.minimum}</div>
@@ -244,11 +244,13 @@ export default function BatteryCheck({ buildingFilter, onBuildingFilter, buildin
       ) : !selectedDate ? (
         <div className="text-neutral-400 text-sm py-8 text-center">Import a schedule first.</div>
       ) : (
-        <div className="flex gap-6">
+        <div className="flex flex-col md:flex-row gap-4 md:gap-6">
           {todayTasks.length > 0 && (
             <div className="flex-1 min-w-0">
               <h3 className="text-sm font-medium text-neutral-500 mb-3">📅 Today's Schedule — Battery Check Rooms</h3>
-              <BatteryCheckDayGrid schedules={todaySchedules} pendingChecks={todayTasks} />
+              <div className="max-h-[50vh] md:max-h-none overflow-y-auto">
+                <BatteryCheckDayGrid schedules={todaySchedules} pendingChecks={todayTasks} />
+              </div>
             </div>
           )}
           <div className="flex-1 min-w-0 space-y-6">

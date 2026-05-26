@@ -40,7 +40,7 @@ export default function BatteryCheckDayGrid({
   return (
     <div className="overflow-x-auto rounded-xl border border-border-light bg-white">
       <div className="grid" style={{ gridTemplateColumns: `40px repeat(${roomIds.length}, minmax(120px, 1fr))` }}>
-          <div className="sticky top-0 z-10 bg-surface-secondary border-b border-border-light py-1.5 text-[10px] font-medium text-neutral-400 text-center">Time</div>
+          <div className="sticky left-0 top-0 z-20 bg-surface-secondary border-b border-r border-border-light py-1.5 text-[10px] font-medium text-neutral-400 text-center">Time</div>
           {roomIds.map(room => {
             const reasons = checkMap[room]
             const badges = []
@@ -54,9 +54,9 @@ export default function BatteryCheckDayGrid({
             )
           })}
 
-          <div className="relative">
+          <div className="sticky left-0 z-10 bg-white">
             {hours.map(h => (
-              <div key={h} className="h-8 border-b border-border-light pr-1 text-right text-[9px] text-neutral-400 leading-none pt-0.5">
+              <div key={h} className="h-8 border-b border-r border-border-light pr-1 text-right text-[9px] text-neutral-400 leading-none pt-0.5">
                 {h > 0 && to12Hour(`${h}:00`)}
               </div>
             ))}

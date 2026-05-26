@@ -58,3 +58,4 @@ export interface DailySummary {
 
 export type Tab = 'dashboard' | 'battery' | 'details' | 'settings'
 export type Building = string
+export type ForceMode = 'auto' | 'desktop' | 'mobile'

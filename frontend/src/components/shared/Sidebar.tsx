@@ -1,4 +1,4 @@
-import type { Tab } from '../../types'
+import type { Tab, ForceMode } from '../../types'
 
 const tabs: { id: Tab; label: string; icon: string }[] = [
   { id: 'dashboard', label: 'Dashboard', icon: '◻' },
@@ -7,9 +7,10 @@ const tabs: { id: Tab; label: string; icon: string }[] = [
   { id: 'settings', label: 'Settings', icon: '⚙' },
 ]
 
-export default function Sidebar({ activeTab, onTabChange }: { activeTab: Tab; onTabChange: (t: Tab) => void }) {
+export default function Sidebar({ activeTab, onTabChange, forceMode }: { activeTab: Tab; onTabChange: (t: Tab) => void; forceMode: ForceMode }) {
+  const hidden = forceMode === 'mobile' ? 'hidden' : forceMode === 'desktop' ? '' : 'hidden md:flex'
   return (
-    <nav className="w-56 bg-surface border-r border-border-light flex flex-col py-4 shrink-0">
+    <nav className={`w-56 bg-surface border-r border-border-light flex-col py-4 shrink-0 ${hidden}`}>
       <div className="px-5 mb-6">
         <h1 className="text-sm font-semibold text-neutral-400 uppercase tracking-wider">BatteryHub+</h1>
       </div>
