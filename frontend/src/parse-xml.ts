@@ -39,15 +39,24 @@ function extractLocation(raw: string): { building: string; room: string; roomNum
   return { building: s, room: s, roomNumber: '' }
 }
 
+function decodeEntities(text: string): string {
+  return text
+    .replace(/&amp;/g, '&')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&quot;/g, '"')
+    .replace(/&apos;/g, "'")
+    .replace(/&#(\d+);/g, (_, n) => String.fromCharCode(Number(n)))
+}
+
 function cellText(cells: any[], idx: number): string {
   const cell = cells[idx]
   if (!cell || !cell.Data) return ''
-  const data = cell.Data
-  return data['#text'] || data || ''
+  const data = Array.isArray(cell.Data) ? cell.Data[0] : cell.Data
+  return decodeEntities(data['#text'] || data || '')
 }
 
 function parseXml(xmlContent: string): any {
-  // Simple recursive XML parser (no deps needed)
   const stack: any[] = []
   let current: any = null
   let inTag = false
@@ -56,17 +65,48 @@ function parseXml(xmlContent: string): any {
   let isSelfClosing = false
   let textContent = ''
   let parsing = false
+  let skipPI = false
 
   const root: any = {}
 
   for (let i = 0; i < xmlContent.length; i++) {
     const ch = xmlContent[i]
 
+    if (skipPI) {
+      if (ch === '?' && xmlContent[i + 1] === '>') {
+        skipPI = false
+      }
+      continue
+    }
+
     if (ch === '<') {
       if (textContent.trim() && current) {
         current['#text'] = textContent.trim()
       }
       textContent = ''
+
+      const next = xmlContent[i + 1]
+      if (next === '?') {
+        skipPI = true
+        continue
+      }
+      if (next === '!' && xmlContent.substring(i + 2, i + 4) === '--') {
+        const endIdx = xmlContent.indexOf('-->', i + 4)
+        if (endIdx > i) {
+          i = endIdx + 2
+        }
+        continue
+      }
+      if (next === '!' && xmlContent.substring(i + 2, i + 9) === '[CDATA[') {
+        const endIdx = xmlContent.indexOf(']]>', i + 9)
+        if (endIdx > i) {
+          const cdata = xmlContent.substring(i + 9, endIdx)
+          if (current) current['#text'] = (current['#text'] || '') + cdata
+          i = endIdx + 2
+        }
+        continue
+      }
+
       inTag = true
       tagName = ''
       isClosing = false
@@ -79,6 +119,8 @@ function parseXml(xmlContent: string): any {
       inTag = false
       parsing = false
 
+      if (tagName.startsWith('?')) continue
+
       if (isSelfClosing) {
         const parts = tagName.split(/\s+/)
         const name = parts[0]
@@ -87,8 +129,7 @@ function parseXml(xmlContent: string): any {
           current[name].push({})
         }
       } else if (isClosing) {
-        stack.pop()
-        current = stack[stack.length - 1] || root
+        current = stack.pop() || root
       } else {
         const parts = tagName.split(/\s+/)
         const name = parts[0]
@@ -100,7 +141,6 @@ function parseXml(xmlContent: string): any {
           current = newNode
         } else {
           root[name] = [newNode]
-          stack.push(current)
           current = newNode
         }
       }
@@ -113,7 +153,6 @@ function parseXml(xmlContent: string): any {
     }
 
     if (ch === '/' && inTag && xmlContent[i - 1] !== '/') {
-      // Could be self-closing
       if (xmlContent[i + 1] === '>') {
         isSelfClosing = true
       }
@@ -133,14 +172,16 @@ function parseXml(xmlContent: string): any {
 export function parseXmlReservations(xmlContent: string): { entries: ParsedEntry[]; weekStart: string | null } {
   const doc = parseXml(xmlContent)
 
-  const sheets = doc.Workbook?.Worksheet || doc.Worksheet
+  const wk = Array.isArray(doc.Workbook) ? doc.Workbook[0] : doc.Workbook
+  const sheets = wk?.Worksheet || doc.Worksheet
   if (!sheets) return { entries: [], weekStart: null }
 
   const sheetList = Array.isArray(sheets) ? sheets : [sheets]
   let rawRows: any[] = []
 
   for (const sheet of sheetList) {
-    const rows = sheet.Table?.Row
+    const table = Array.isArray(sheet.Table) ? sheet.Table[0] : sheet.Table
+    const rows = table?.Row
     if (Array.isArray(rows) && rows.length > rawRows.length) {
       rawRows = rows
     }
