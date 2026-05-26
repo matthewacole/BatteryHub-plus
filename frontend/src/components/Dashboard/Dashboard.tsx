@@ -45,13 +45,14 @@ export default function Dashboard({ buildingFilter, onBuildingFilter, buildings 
         </div>
       ) : (
         <div className="overflow-auto max-h-[calc(100vh-220px)]">
-          <table className="w-full text-sm border-collapse">
+          <table className="w-full text-xs md:text-sm border-collapse">
             <thead className="sticky top-0 z-10 bg-surface-secondary">
               <tr>
-                <th className="text-left py-2 pr-4 text-neutral-400 font-medium sticky left-0 bg-surface-secondary z-20">Room</th>
+                <th className="text-left py-2 pr-2 md:pr-4 text-neutral-400 font-medium sticky left-0 bg-surface-secondary z-20">Room</th>
                 {days.map(d => (
-                  <th key={d} className="py-2 px-3 text-neutral-400 font-medium text-center min-w-[120px] bg-surface-secondary">
-                    {new Date(d + 'T12:00:00').toLocaleDateString('en', { weekday: 'short', month: 'short', day: 'numeric' })}
+                  <th key={d} className="py-2 px-2 md:px-3 text-neutral-400 font-medium text-center min-w-[90px] md:min-w-[120px] bg-surface-secondary">
+                    <span className="hidden md:inline">{new Date(d + 'T12:00:00').toLocaleDateString('en', { weekday: 'short', month: 'short', day: 'numeric' })}</span>
+                    <span className="md:hidden">{new Date(d + 'T12:00:00').toLocaleDateString('en', { weekday: 'short', day: 'numeric' })}</span>
                   </th>
                 ))}
               </tr>
@@ -61,7 +62,7 @@ export default function Dashboard({ buildingFilter, onBuildingFilter, buildings 
                 const isManaged = managedRooms.has(room)
                 return (
                   <tr key={room} className="border-t border-neutral-100">
-                     <td className={`py-2 pr-4 sticky left-0 bg-surface-secondary ${isManaged ? 'font-bold text-text-primary' : 'font-medium text-neutral-600'}`}>{room}</td>
+                     <td className={`py-2 pr-2 md:pr-4 sticky left-0 bg-surface-secondary ${isManaged ? 'font-bold text-text-primary' : 'font-medium text-neutral-600'}`}>{room}</td>
                     {days.map(day => {
                       const summary = summaries.find(s => s.room === room && s.date === day)
                       const daySched = schedules.filter(s => s.room === room && s.date === day)

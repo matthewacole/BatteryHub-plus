@@ -15,9 +15,18 @@ export default function Settings({ onManagedBuildingsChange }: { onManagedBuildi
     api.imports.list().then(setImports).catch(() => {})
   }, [])
 
+  const VALID_EXTENSIONS = ['.xml', '.xlsx', '.xls']
+  const VALID_MIMES = ['text/xml', 'application/xml', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 'application/vnd.ms-excel']
+
   const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file) return
+    const ext = '.' + file.name.split('.').pop()?.toLowerCase()
+    if (!VALID_EXTENSIONS.includes(ext) && !VALID_MIMES.includes(file.type)) {
+      setMessage({ type: 'error', text: 'Please select a .xlsx or .xml file from 25Live.' })
+      if (fileRef.current) fileRef.current.value = ''
+      return
+    }
     setUploading(true)
     setMessage(null)
     try {
@@ -118,7 +127,7 @@ export default function Settings({ onManagedBuildingsChange }: { onManagedBuildi
             <span className="text-2xl mb-2">📂</span>
             <span className="text-sm text-neutral-500">{uploading ? 'Importing...' : 'Click to upload weekly schedule file'}</span>
             <span className="text-xs text-neutral-400 mt-1">.xlsx or .xml from 25Live</span>
-            <input ref={fileRef} type="file" accept=".xml,.xlsx" onChange={handleUpload} className="hidden" disabled={uploading} />
+            <input ref={fileRef} type="file" accept=".xml,.xlsx,text/xml,application/xml,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel" onChange={handleUpload} className="hidden" disabled={uploading} />
           </label>
         </div>
       </section>
