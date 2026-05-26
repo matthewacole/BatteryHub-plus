@@ -1,7 +1,7 @@
 import type { ScheduleEntry } from '../../types'
 import { to12Hour } from '../../utils'
 
-const HOUR_HEIGHT = 48
+const HOUR_HEIGHT = 36
 const START_HOUR = 7
 const END_HOUR = 22
 
@@ -45,11 +45,11 @@ export default function WeekCalendar({
 
   return (
     <div>
-      <div className="flex items-center gap-3 mb-4">
-        <button onClick={onPrevWeek} className="px-3 py-1.5 rounded-lg border border-neutral-200 text-sm text-neutral-500 hover:bg-neutral-100">&larr;</button>
-        <span className="text-sm font-medium text-neutral-700 min-w-[200px] text-center">{label}</span>
-        <button onClick={onNextWeek} className="px-3 py-1.5 rounded-lg border border-neutral-200 text-sm text-neutral-500 hover:bg-neutral-100">&rarr;</button>
-        <button onClick={onToday} className="px-3 py-1.5 rounded-lg border border-blue-200 text-sm text-blue-600 hover:bg-blue-50 ml-2">Today</button>
+      <div className="flex items-center gap-1 md:gap-3 mb-3 md:mb-4 flex-wrap">
+        <button onClick={onPrevWeek} className="px-2 md:px-3 py-1 md:py-1.5 rounded-lg border border-neutral-200 text-xs md:text-sm text-neutral-500 hover:bg-neutral-100">&larr;</button>
+        <span className="text-xs md:text-sm font-medium text-neutral-700 min-w-[120px] md:min-w-[200px] text-center order-3 md:order-none w-full md:w-auto">{label}</span>
+        <button onClick={onNextWeek} className="px-2 md:px-3 py-1 md:py-1.5 rounded-lg border border-neutral-200 text-xs md:text-sm text-neutral-500 hover:bg-neutral-100">&rarr;</button>
+        <button onClick={onToday} className="px-2 md:px-3 py-1 md:py-1.5 rounded-lg border border-blue-200 text-xs md:text-sm text-blue-600 hover:bg-blue-50 ml-auto md:ml-2">Today</button>
       </div>
 
       <div className="overflow-auto">
@@ -70,7 +70,7 @@ export default function WeekCalendar({
 
           <div className="relative">
             {hours.map(h => (
-              <div key={h} className="h-12 border-b border-border-light pr-1 text-right text-[10px] text-neutral-400 leading-none pt-0.5">
+              <div key={h} className="h-9 border-b border-border-light pr-1 text-right text-[10px] text-neutral-400 leading-none pt-0.5">
                 {h > 0 && to12Hour(`${h}:00`)}
               </div>
             ))}
@@ -82,7 +82,7 @@ export default function WeekCalendar({
             return (
               <div key={dayIdx} className={`relative border-l border-border-light ${isWeekend ? 'bg-neutral-50/50' : ''}`}>
                 {hours.map(h => (
-                  <div key={h} className={`h-12 border-b ${h < END_HOUR ? 'border-border-light' : ''}`} />
+                  <div key={h} className={`h-9 border-b ${h < END_HOUR ? 'border-border-light' : ''}`} />
                 ))}
                 {classes.map(c => {
                   const top = timeToPx(c.start_time)

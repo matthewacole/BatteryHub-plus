@@ -42,8 +42,11 @@ export default function ClassDetails({ buildingFilter, onBuildingFilter, buildin
   useEffect(() => {
     if (!selectedRoom) return
     setLoading(true)
+    const from = new Date()
+    from.setMonth(from.getMonth() - 3)
+    const fromStr = from.toISOString().slice(0, 10)
     api.schedules.list(undefined, undefined).then(all => {
-      setSchedules(all.filter(s => s.room === selectedRoom))
+      setSchedules(all.filter(s => s.room === selectedRoom && s.date >= fromStr))
     }).catch(() => {}).finally(() => setLoading(false))
   }, [selectedRoom])
 
@@ -115,18 +118,18 @@ export default function ClassDetails({ buildingFilter, onBuildingFilter, buildin
         </div>
       </div>
       {roomMeta && viewMode === 'list' && (
-        <div className="flex gap-4 mb-6">
-          <div className="bg-white rounded-xl border border-border-light px-5 py-3 shadow-sm">
-            <div className="text-xs text-neutral-400 uppercase tracking-wider mb-1">Type</div>
-            <div className="font-semibold text-text-primary">{roomMeta.room_type}</div>
+        <div className="flex flex-col md:flex-row gap-2 md:gap-4 mb-4 md:mb-6">
+          <div className="bg-white rounded-xl border border-border-light px-3 py-2 md:px-5 md:py-3 shadow-sm">
+            <div className="text-[10px] md:text-xs text-neutral-400 uppercase tracking-wider mb-0.5 md:mb-1">Type</div>
+            <div className="text-sm md:text-base font-semibold text-text-primary">{roomMeta.room_type}</div>
           </div>
-          <div className="bg-white rounded-xl border border-border-light px-5 py-3 shadow-sm">
-            <div className="text-xs text-neutral-400 uppercase tracking-wider mb-1">Battery Requirement</div>
-            <div className="font-semibold text-text-primary">{roomMeta.battery_req} batteries</div>
+          <div className="bg-white rounded-xl border border-border-light px-3 py-2 md:px-5 md:py-3 shadow-sm">
+            <div className="text-[10px] md:text-xs text-neutral-400 uppercase tracking-wider mb-0.5 md:mb-1">Batteries</div>
+            <div className="text-sm md:text-base font-semibold text-text-primary">{roomMeta.battery_req}</div>
           </div>
-          <div className="bg-white rounded-xl border border-border-light px-5 py-3 shadow-sm">
-            <div className="text-xs text-neutral-400 uppercase tracking-wider mb-1">Total Week Hours</div>
-            <div className="font-semibold text-text-primary">{totalHours.toFixed(1)}h</div>
+          <div className="bg-white rounded-xl border border-border-light px-3 py-2 md:px-5 md:py-3 shadow-sm">
+            <div className="text-[10px] md:text-xs text-neutral-400 uppercase tracking-wider mb-0.5 md:mb-1">Hours</div>
+            <div className="text-sm md:text-base font-semibold text-text-primary">{totalHours.toFixed(1)}h</div>
           </div>
         </div>
       )}

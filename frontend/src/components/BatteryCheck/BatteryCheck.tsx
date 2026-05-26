@@ -200,9 +200,9 @@ export default function BatteryCheck({ buildingFilter, onBuildingFilter, buildin
   const todayTasks = todaysChecks.filter(c => c.completed === 0)
 
   return (
-    <div>
-      <div className="flex items-center justify-between mb-2">
-        <h2 className="text-xl font-semibold">Battery Check</h2>
+    <div className="h-full flex flex-col overflow-hidden">
+      <div className="flex items-center justify-between mb-1 md:mb-2">
+        <h2 className="text-lg md:text-xl font-semibold">Battery Check</h2>
         <button onClick={printPdf} className="text-xs px-3 py-1.5 rounded-full bg-white border border-border-light text-neutral-500 hover:bg-surface-tertiary transition-colors">
           Print PDF
         </button>
@@ -210,14 +210,14 @@ export default function BatteryCheck({ buildingFilter, onBuildingFilter, buildin
       <BuildingFilter active={buildingFilter} onChange={onBuildingFilter} buildings={buildings} />
 
       {inventory && (
-        <div className="flex flex-col md:flex-row gap-4 mb-4">
-          <div className="bg-white rounded-xl border border-border-light px-5 py-3 flex-1 shadow-sm">
-            <div className="text-xs text-neutral-400 uppercase tracking-wider mb-1">Minimum Batteries</div>
-            <div className="text-2xl font-semibold text-text-primary">{inventory.minimum}</div>
+        <div className="flex flex-row gap-2 mb-2 md:gap-4 md:mb-4">
+          <div className="bg-white rounded-xl border border-border-light px-2 py-1 md:px-5 md:py-3 flex-1 shadow-none md:shadow-sm">
+            <div className="text-[9px] md:text-xs text-neutral-400 uppercase tracking-wider mb-0 md:mb-1">Min</div>
+            <div className="text-sm md:text-2xl font-semibold text-text-primary">{inventory.minimum}</div>
           </div>
-          <div className="bg-white rounded-xl border border-border-light px-5 py-3 flex-1 shadow-sm">
-            <div className="text-xs text-neutral-400 uppercase tracking-wider mb-1">Recommended Stock</div>
-            <div className="text-2xl font-semibold text-ai-orange">{inventory.recommended}</div>
+          <div className="bg-white rounded-xl border border-border-light px-2 py-1 md:px-5 md:py-3 flex-1 shadow-none md:shadow-sm">
+            <div className="text-[9px] md:text-xs text-neutral-400 uppercase tracking-wider mb-0 md:mb-1">Rec</div>
+            <div className="text-sm md:text-2xl font-semibold text-ai-orange">{inventory.recommended}</div>
           </div>
         </div>
       )}
@@ -247,16 +247,16 @@ export default function BatteryCheck({ buildingFilter, onBuildingFilter, buildin
       ) : !selectedDate ? (
         <div className="text-neutral-400 text-sm py-8 text-center">Import a schedule first.</div>
       ) : (
-        <div className="flex flex-col md:flex-row gap-4 md:gap-6">
+        <div className="flex-1 min-h-0 flex flex-col md:flex-row gap-4 md:gap-6 overflow-hidden">
           {todayTasks.length > 0 && (
-            <div className="flex-1 min-w-0">
+            <div className="flex-1 min-h-0 overflow-hidden flex flex-col">
               <h3 className="text-sm font-medium text-neutral-500 mb-3">📅 Today's Schedule — Battery Check Rooms</h3>
-              <div className="max-h-[50vh] md:max-h-none overflow-y-auto">
+              <div className="flex-1 min-h-0 overflow-hidden">
                 <BatteryCheckDayGrid schedules={todaySchedules} pendingChecks={todayTasks} />
               </div>
             </div>
           )}
-          <div className="flex-1 min-w-0 space-y-6">
+          <div className="flex-1 min-h-0 overflow-y-auto space-y-6">
             <section>
               <h3 className="text-sm font-medium text-neutral-500 mb-3">🔍 Tonight's Tasks</h3>
               {todayTasks.length === 0 ? (
