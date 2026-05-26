@@ -106,7 +106,7 @@ export default function Settings({ onManagedBuildingsChange, forceMode, onForceM
         <h2 className="text-xl font-semibold">Settings</h2>
         <div className="flex items-center gap-1.5 text-xs text-neutral-400">
           <span>⚡BatteryHub+</span>
-          <span className="text-neutral-300">v1.4.0</span>
+          <span className="text-neutral-300">v1.5.0</span>
         </div>
       </div>
       <section className="mb-8">

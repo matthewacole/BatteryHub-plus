@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import type { BatteryCheck as BCType, Inventory, ScheduleEntry } from '../../types'
 import { api } from '../../api'
 import { to12Hour } from '../../utils'
+import { updateBadge } from '../../badge'
 import BuildingFilter from '../shared/BuildingFilter'
 import BatteryCheckDayGrid from './BatteryCheckDayGrid'
 import RoomScheduleModal from './RoomScheduleModal'
@@ -52,6 +53,8 @@ export default function BatteryCheck({ buildingFilter, onBuildingFilter, buildin
       setTodaySchedules(sched)
     }).catch(() => {}).finally(() => setLoading(false))
   }, [selectedDate, buildingFilter])
+
+  useEffect(() => { updateBadge() }, [todaysChecks])
 
   const refreshDay = () => {
     if (!selectedDate) return

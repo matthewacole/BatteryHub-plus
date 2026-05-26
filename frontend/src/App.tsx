@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import type { Tab, ForceMode } from './types'
 import { api } from './api'
+import { updateBadge } from './badge'
 import Sidebar from './components/shared/Sidebar'
 import MobileNav from './components/shared/MobileNav'
 import Dashboard from './components/Dashboard/Dashboard'
@@ -25,6 +26,7 @@ export default function App() {
   const [forceMode, setForceMode] = useState<ForceMode>(getStoredForceMode)
 
   useEffect(() => {
+    updateBadge()
     api.rooms.managed.buildings().then(setManagedBuildings).catch(() => {})
   }, [])
 
