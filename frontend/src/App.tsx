@@ -8,6 +8,7 @@ import Dashboard from './components/Dashboard/Dashboard'
 import BatteryCheck from './components/BatteryCheck/BatteryCheck'
 import ClassDetails from './components/ClassDetails/ClassDetails'
 import Settings from './components/Settings/Settings'
+import SplashScreen from './components/shared/SplashScreen'
 
 const FORCE_MODE_KEY = 'battery-hub-ui-mode'
 
@@ -20,6 +21,7 @@ function getStoredForceMode(): ForceMode {
 }
 
 export default function App() {
+  const [splashDone, setSplashDone] = useState(false)
   const [activeTab, setActiveTab] = useState<Tab>('dashboard')
   const [buildingFilter, setBuildingFilter] = useState<string>('ALL')
   const [managedBuildings, setManagedBuildings] = useState<string[]>([])
@@ -33,7 +35,9 @@ export default function App() {
   const buildings = managedBuildings
 
   return (
-    <div className="flex h-screen bg-surface-secondary text-text-primary overflow-hidden font-sans">
+    <>
+      {!splashDone && <SplashScreen onDone={() => setSplashDone(true)} />}
+      <div className="flex h-screen bg-surface-secondary text-text-primary overflow-hidden font-sans">
       <Sidebar activeTab={activeTab} onTabChange={setActiveTab} forceMode={forceMode} />
       <MobileNav activeTab={activeTab} onTabChange={setActiveTab} forceMode={forceMode} />
       <main className="flex-1 flex flex-col min-w-0">
@@ -51,5 +55,6 @@ export default function App() {
         </div>
       </main>
     </div>
+    </>
   )
 }
