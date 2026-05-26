@@ -1,84 +1,112 @@
-const BASE = '/api'
-
-async function get<T>(path: string): Promise<T> {
-  const res = await fetch(`${BASE}${path}`)
-  if (!res.ok) { const err = await res.json().catch(() => ({ error: res.statusText })); throw new Error(err.error) }
-  return res.json()
-}
-
-async function post<T>(path: string, body?: FormData | object): Promise<T> {
-  const isForm = body instanceof FormData
-  const res = await fetch(`${BASE}${path}`, {
-    method: 'POST',
-    headers: isForm ? {} : { 'Content-Type': 'application/json' },
-    body: isForm ? body : JSON.stringify(body),
-  })
-  if (!res.ok) { const err = await res.json().catch(() => ({ error: res.statusText })); throw new Error(err.error) }
-  return res.json()
-}
-
-async function del<T>(path: string): Promise<T> {
-  const res = await fetch(`${BASE}${path}`, { method: 'DELETE' })
-  if (!res.ok) { const err = await res.json().catch(() => ({ error: res.statusText })); throw new Error(err.error) }
-  return res.json()
-}
-
 import type { ScheduleEntry, BatteryCheck, ImportResult, Inventory, DailySummary } from './types'
 import type { Room } from './types'
 
+import {
+  getSchedules,
+  getScheduleDates,
+  getWeekSchedules,
+  getBuildings,
+  getManagedBuildings,
+  getManagedRoomsGrouped,
+  getRoomsByBuilding,
+  getBatteryChecks,
+  completeCheck,
+  calcMinimumInventory,
+  calcRecommendedInventory,
+  getDailySummary,
+  getManagedRoomIdsList,
+  getImports,
+  getImport,
+  insertImport,
+  deleteImport,
+  classifyRoom,
+  updateRoomManaged,
+  updateRoomConfig,
+} from './db'
+import { processWeek } from './process-week'
+
 export const api = {
   schedules: {
-    list: (building?: string, date?: string) =>
-      get<ScheduleEntry[]>(`/schedules?${new URLSearchParams({ ...(building && { building }), ...(date && { date }) }).toString()}`),
-    buildings: () => get<string[]>('/schedules/buildings'),
-    dates: () => get<string[]>('/schedules/dates'),
-    week: (opts: { building?: string; room?: string; date: string }) => {
-      const q = new URLSearchParams({ date: opts.date })
-      if (opts.building) q.set('building', opts.building)
-      if (opts.room) q.set('room', opts.room)
-      return get<ScheduleEntry[]>(`/schedules/week?${q}`)
-    },
+    list: (building?: string, date?: string): Promise<ScheduleEntry[]> =>
+      Promise.resolve(getSchedules(building, date)),
+    buildings: (): Promise<string[]> =>
+      Promise.resolve(getBuildings()),
+    dates: (): Promise<string[]> =>
+      Promise.resolve(getScheduleDates()),
+    week: (opts: { building?: string; room?: string; date: string }): Promise<ScheduleEntry[]> =>
+      Promise.resolve(getWeekSchedules(opts)),
   },
   rooms: {
-    list: (building?: string) => get<Room[]>(`/rooms${building ? `?building=${building}` : ''}`),
-    classification: (roomId: string) => get<{ roomType: string; batteryReq: number }>(`/rooms/${roomId}/classification`),
+    list: (building?: string): Promise<Room[]> =>
+      Promise.resolve(getRoomsByBuilding(building)),
+    classification: (roomId: string): Promise<{ roomType: string; batteryReq: number }> =>
+      Promise.resolve(classifyRoom(roomId)),
     managed: {
-      list: () => get<{ building: string; rooms: Room[] }[]>('/rooms/managed/list'),
-      buildings: () => get<string[]>('/rooms/managed/buildings'),
-      update: (updates: { roomId: string; managed?: boolean; roomType?: string }[]) => post<{ ok: boolean }>('/rooms/managed', { updates }),
+      list: () => Promise.resolve(getManagedRoomsGrouped()),
+      buildings: () => Promise.resolve(getManagedBuildings()),
+      update: (updates: { roomId: string; managed?: boolean; roomType?: string }[]) => {
+        for (const u of updates) {
+          if (u.managed !== undefined) updateRoomManaged(u.roomId, u.managed)
+          if (u.roomType) updateRoomConfig(u.roomId, u.roomType)
+        }
+        return Promise.resolve({ ok: true } as const)
+      },
     },
-    buildings: () => get<string[]>('/rooms/buildings'),
+    buildings: (): Promise<string[]> =>
+      Promise.resolve(getBuildings()),
   },
 
   imports: {
-    upload: (file: File) => {
-      const fd = new FormData()
-      fd.append('file', file)
-      return post<ImportResult>('/import', fd)
+    upload: async (file: File): Promise<ImportResult> => {
+      const ext = file.name.split('.').pop()?.toLowerCase()
+      let result: { entries: any[]; weekStart: string | null }
+      if (ext === 'xml') {
+        const text = await file.text()
+        const { parseXmlReservations } = await import('./parse-xml')
+        result = parseXmlReservations(text)
+      } else {
+        const { parseWorkbook } = await import('./parse-workbook')
+        result = await parseWorkbook(file)
+      }
+      if (result.entries.length === 0) {
+        throw new Error('No supported room entries found in file')
+      }
+      const entries = result.entries.map(e => ({
+        date: e.date,
+        className: e.className || e.class_name,
+        building: e.building,
+        room: e.room,
+        roomNumber: e.roomNumber,
+        startTime: e.startTime,
+        endTime: e.endTime,
+        durationHours: e.durationHours,
+      }))
+      const impResult = insertImport(file.name, result.weekStart || '', entries)
+      // Run battery check generation
+      processWeek(impResult.importId)
+      return impResult
     },
-    list: () => get<ImportType[]>('/import'),
-    get: (id: number) => get<{ import: ImportType; entries: ScheduleEntry[] }>(`/import/${id}`),
-    delete: (id: number) => del<{ ok: boolean }>(`/import/${id}`),
+    list: () => Promise.resolve(getImports()),
+    get: (id: number) => Promise.resolve(getImport(id)),
+    delete: (id: number) => {
+      deleteImport(id)
+      return Promise.resolve({ ok: true } as const)
+    },
   },
-  ai: {
-    ask: (query: string, opts?: { importId?: number; date?: string; tab?: string; building?: string }) =>
-      post<{ answer: string }>('/ai/ask', { query, ...opts }),
-    config: () => get<{ apiUrl: string; model: string; apiKey: string }>('/ai/config'),
-    updateConfig: (cfg: { apiUrl?: string; model?: string; apiKey?: string }) => post<{ apiUrl: string; model: string; apiKey: string }>('/ai/config', cfg),
-    models: () => get<string[]>('/ai/models'),
-  },
+  ai: undefined as never,
   battery: {
-    checks: (params?: { building?: string; date?: string; completed?: number }) => {
-      const q = new URLSearchParams()
-      if (params?.building) q.set('building', params.building)
-      if (params?.date) q.set('date', params.date)
-      if (params?.completed !== undefined) q.set('completed', String(params.completed))
-      return get<BatteryCheck[]>(`/battery/checks?${q}`)
+    checks: (params?: { building?: string; date?: string; completed?: number }): Promise<BatteryCheck[]> =>
+      Promise.resolve(getBatteryChecks(params)),
+    completeCheck: (id: number) => {
+      completeCheck(id)
+      return Promise.resolve({ ok: true } as const)
     },
-    completeCheck: (id: number) => post<{ ok: boolean }>(`/battery/checks/${id}/complete`),
-    inventory: () => get<Inventory>(`/battery/inventory`),
-    summary: (date: string) => get<DailySummary[]>(`/battery/summary?date=${date}`),
-    managedRooms: () => get<string[]>('/battery/managed-rooms'),
+    inventory: (): Promise<Inventory> =>
+      Promise.resolve({ minimum: calcMinimumInventory(), recommended: calcRecommendedInventory() }),
+    summary: (date: string): Promise<DailySummary[]> =>
+      Promise.resolve(getDailySummary(date)),
+    managedRooms: (): Promise<string[]> =>
+      Promise.resolve(getManagedRoomIdsList()),
   },
 }
 

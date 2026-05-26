@@ -11,7 +11,7 @@ export default function Sidebar({ activeTab, onTabChange }: { activeTab: Tab; on
   return (
     <nav className="w-56 bg-surface border-r border-border-light flex flex-col py-4 shrink-0">
       <div className="px-5 mb-6">
-        <h1 className="text-sm font-semibold text-neutral-400 uppercase tracking-wider">Battery Hub</h1>
+        <h1 className="text-sm font-semibold text-neutral-400 uppercase tracking-wider">BatteryHub+</h1>
       </div>
       {tabs.map(t => (
         <button

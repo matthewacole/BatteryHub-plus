@@ -6,7 +6,6 @@ import Dashboard from './components/Dashboard/Dashboard'
 import BatteryCheck from './components/BatteryCheck/BatteryCheck'
 import ClassDetails from './components/ClassDetails/ClassDetails'
 import Settings from './components/Settings/Settings'
-import AiAssistant from './components/AiAssistant/AiAssistant'
 
 export default function App() {
   const [activeTab, setActiveTab] = useState<Tab>('dashboard')
@@ -35,7 +34,6 @@ export default function App() {
           )}
           {activeTab === 'settings' && <Settings onManagedBuildingsChange={() => api.rooms.managed.buildings().then(setManagedBuildings).catch(() => {})} />}
         </div>
-        <AiAssistant tab={activeTab} building={buildingFilter} />
       </main>
     </div>
   )

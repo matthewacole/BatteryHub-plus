@@ -1,37 +1,19 @@
 import { useState, useEffect, useRef } from 'react'
 import { api, type ImportType } from '../../api'
+import { exportData, importData } from '../../db'
 import Configure from './Configure'
 
 export default function Settings({ onManagedBuildingsChange }: { onManagedBuildingsChange: () => void }) {
   const [imports, setImports] = useState<ImportType[]>([])
   const [uploading, setUploading] = useState(false)
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
-  const [aiConfig, setAiConfig] = useState({ apiUrl: 'https://generativelanguage.googleapis.com/v1beta', model: 'gemini-2.0-flash', apiKey: '' })
-  const [models, setModels] = useState<string[]>([])
-  const [modelsLoading, setModelsLoading] = useState(false)
   const fileRef = useRef<HTMLInputElement>(null)
-  const urlTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
+  const importFileRef = useRef<HTMLInputElement>(null)
+  const [confirmImport, setConfirmImport] = useState<any>(null)
 
   useEffect(() => {
     api.imports.list().then(setImports).catch(() => {})
-    api.ai.config().then(setAiConfig).catch(() => {})
   }, [])
-
-  useEffect(() => {
-    if (urlTimer.current) clearTimeout(urlTimer.current)
-    urlTimer.current = setTimeout(() => {
-      if (!aiConfig.apiUrl) return
-      setModelsLoading(true)
-      api.ai.models().then(list => {
-        setModels(list)
-        if (list.length > 0 && !list.includes(aiConfig.model)) {
-          const m = list[0]
-          setAiConfig(prev => ({ ...prev, model: m }))
-          api.ai.updateConfig({ ...aiConfig, model: m }).catch(() => {})
-        }
-      }).catch(() => setModels([])).finally(() => setModelsLoading(false))
-    }, 400)
-  }, [aiConfig.apiUrl])
 
   const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
@@ -59,17 +41,51 @@ export default function Settings({ onManagedBuildingsChange }: { onManagedBuildi
     }
   }
 
-  const handleSaveAiConfig = async () => {
-    try {
-      await api.ai.updateConfig(aiConfig)
-      setMessage({ type: 'success', text: 'AI config saved' })
-    } catch (err: any) {
-      setMessage({ type: 'error', text: err.message })
-    }
+  const handleExport = () => {
+    const data = exportData()
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `battery-hub-backup-${new Date().toISOString().slice(0, 10)}.json`
+    a.click()
+    URL.revokeObjectURL(url)
+    setMessage({ type: 'success', text: 'Data exported successfully' })
   }
 
-  const handleModelChange = (model: string) => {
-    setAiConfig(prev => ({ ...prev, model }))
+  const handleImportSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    const reader = new FileReader()
+    reader.onload = (ev) => {
+      try {
+        const data = JSON.parse(ev.target!.result as string)
+        if (data.version !== 1) throw new Error('Unsupported export version')
+        const summary = [
+          `${data.data.imports?.length || 0} imports`,
+          `${data.data.schedules?.length || 0} schedule entries`,
+          `${data.data.batteryChecks?.length || 0} battery checks`,
+        ].join(', ')
+        setConfirmImport(data)
+        setMessage({ type: 'success', text: `File valid — ${summary}. Click "Confirm Import" to apply.` })
+      } catch (err: any) {
+        setMessage({ type: 'error', text: `Invalid file: ${err.message}` })
+      }
+    }
+    reader.readAsText(file)
+    if (importFileRef.current) importFileRef.current.value = ''
+  }
+
+  const handleConfirmImport = () => {
+    if (!confirmImport) return
+    try {
+      importData(confirmImport)
+      setConfirmImport(null)
+      setMessage({ type: 'success', text: 'Data imported successfully. Reloading...' })
+      setTimeout(() => location.reload(), 1000)
+    } catch (err: any) {
+      setMessage({ type: 'error', text: `Import failed: ${err.message}` })
+    }
   }
 
   return (
@@ -82,13 +98,26 @@ export default function Settings({ onManagedBuildingsChange }: { onManagedBuildi
           {message.text}
         </div>
       )}
+      {confirmImport && (
+        <div className="mb-4 px-4 py-3 rounded-xl bg-ai-yellow/10 border border-ai-yellow/30 text-sm flex items-center justify-between">
+          <span className="text-neutral-700">Ready to import this backup file.</span>
+          <div className="flex gap-2">
+            <button onClick={() => setConfirmImport(null)} className="px-3 py-1.5 rounded-lg text-sm text-neutral-500 hover:text-text-primary transition-colors">
+              Cancel
+            </button>
+            <button onClick={handleConfirmImport} className="px-3 py-1.5 rounded-lg text-sm text-white bg-ai-blue hover:bg-ai-blue/90 transition-colors">
+              Confirm Import
+            </button>
+          </div>
+        </div>
+      )}
       <section className="mb-8">
         <h3 className="text-sm font-medium text-neutral-500 uppercase tracking-wider mb-3">Import Schedule</h3>
           <div className="bg-white rounded-xl border border-border-light p-5 shadow-sm">
           <label className="flex flex-col items-center justify-center border-2 border-dashed border-border-light rounded-xl py-8 cursor-pointer hover:border-ai-blue/30 transition-colors">
             <span className="text-2xl mb-2">📂</span>
-            <span className="text-sm text-neutral-500">{uploading ? 'Uploading...' : 'Click to upload weekly Excel file'}</span>
-            <span className="text-xs text-neutral-400 mt-1">.xlsx from 25Live</span>
+            <span className="text-sm text-neutral-500">{uploading ? 'Importing...' : 'Click to upload weekly schedule file'}</span>
+            <span className="text-xs text-neutral-400 mt-1">.xlsx or .xml from 25Live</span>
             <input ref={fileRef} type="file" accept=".xml,.xlsx" onChange={handleUpload} className="hidden" disabled={uploading} />
           </label>
         </div>
@@ -115,54 +144,18 @@ export default function Settings({ onManagedBuildingsChange }: { onManagedBuildi
       </section>
       <Configure onManagedChange={onManagedBuildingsChange} />
       <section className="mb-8">
-        <h3 className="text-sm font-medium text-neutral-500 uppercase tracking-wider mb-3">AI Configuration</h3>
-        <div className="bg-white rounded-xl border border-border-light p-5 space-y-4 shadow-sm">
-          <div>
-            <label className="text-xs text-neutral-400 block mb-1">API URL</label>
-            <input
-              type="text"
-              value={aiConfig.apiUrl}
-              onChange={e => setAiConfig(prev => ({ ...prev, apiUrl: e.target.value }))}
-              className="w-full px-3 py-2 rounded-lg border border-border-light text-sm focus:outline-none focus:ring-2 focus:ring-ai-blue/30"
-            />
+        <h3 className="text-sm font-medium text-neutral-500 uppercase tracking-wider mb-3">Data Management</h3>
+        <div className="bg-white rounded-xl border border-border-light p-5 shadow-sm">
+          <p className="text-sm text-neutral-500 mb-4">Export your data as a JSON backup or import a previous backup. Data is stored locally in this browser.</p>
+          <div className="flex gap-3">
+            <button onClick={handleExport} className="px-4 py-2 bg-ai-blue text-white rounded-lg text-sm hover:bg-ai-blue/90 transition-colors">
+              Export Data
+            </button>
+            <label className="px-4 py-2 bg-ai-green/10 text-ai-green rounded-lg text-sm hover:bg-ai-green/20 transition-colors cursor-pointer">
+              Import Data
+              <input ref={importFileRef} type="file" accept=".json" onChange={handleImportSelect} className="hidden" />
+            </label>
           </div>
-          <div>
-            <label className="text-xs text-neutral-400 block mb-1">Model</label>
-            {modelsLoading ? (
-              <div className="px-3 py-2 text-sm text-neutral-400">Loading models...</div>
-            ) : models.length > 0 ? (
-              <select
-                value={aiConfig.model}
-                onChange={e => handleModelChange(e.target.value)}
-                className="w-full px-3 py-2 rounded-lg border border-border-light text-sm focus:outline-none focus:ring-2 focus:ring-ai-blue/30 bg-white"
-              >
-                {models.map(m => (
-                  <option key={m} value={m}>{m}</option>
-                ))}
-              </select>
-            ) : (
-              <input
-                type="text"
-                value={aiConfig.model}
-                onChange={e => setAiConfig(prev => ({ ...prev, model: e.target.value }))}
-                placeholder="No models found — type manually"
-                className="w-full px-3 py-2 rounded-lg border border-border-light text-sm focus:outline-none focus:ring-2 focus:ring-ai-blue/30"
-              />
-            )}
-          </div>
-          <div>
-            <label className="text-xs text-neutral-400 block mb-1">API Key (Gemini)</label>
-            <input
-              type="password"
-              value={aiConfig.apiKey}
-              onChange={e => setAiConfig(prev => ({ ...prev, apiKey: e.target.value }))}
-              placeholder="Enter your Gemini API key"
-              className="w-full px-3 py-2 rounded-lg border border-border-light text-sm focus:outline-none focus:ring-2 focus:ring-ai-blue/30"
-            />
-          </div>
-          <button onClick={handleSaveAiConfig} className="px-4 py-2 bg-ai-blue text-white rounded-lg text-sm hover:bg-ai-blue/90 transition-colors">
-            Save
-          </button>
         </div>
       </section>
     </div>
