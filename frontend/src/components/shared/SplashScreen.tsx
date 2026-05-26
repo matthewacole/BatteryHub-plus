@@ -15,7 +15,7 @@ export default function SplashScreen({ onDone }: { onDone: () => void }) {
       }`}
       onTransitionEnd={() => fade && onDone()}
     >
-      <img src="/icons/icon-192.png" alt="" className="w-16 h-16 mb-4" />
+      <img src="icons/icon-192.png" alt="" className="w-16 h-16 mb-4" />
       <div className="text-sm font-semibold text-neutral-400 uppercase tracking-wider">BatteryHub+</div>
     </div>
   )
