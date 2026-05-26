@@ -5,6 +5,7 @@ import { api } from '../../api'
 export default function Configure({ onManagedChange }: { onManagedChange: () => void }) {
   const [groups, setGroups] = useState<{ building: string; rooms: Room[] }[]>([])
   const [loading, setLoading] = useState(true)
+  const [collapsed, setCollapsed] = useState(false)
 
   useEffect(() => {
     api.rooms.managed.list().then(setGroups).catch(() => {}).finally(() => setLoading(false))
@@ -41,8 +42,15 @@ export default function Configure({ onManagedChange }: { onManagedChange: () => 
 
   return (
     <section className="mb-8">
-      <h3 className="text-sm font-medium text-neutral-500 uppercase tracking-wider mb-3">Configure Rooms</h3>
-      <div className="space-y-3">
+      <button
+        onClick={() => setCollapsed(c => !c)}
+        className="flex items-center justify-between w-full text-sm font-medium text-neutral-500 uppercase tracking-wider mb-3"
+      >
+        <span>Configure Rooms</span>
+        <span className={`text-xs transition-transform ${collapsed ? '' : 'rotate-180'}`}>▼</span>
+      </button>
+      {!collapsed && (
+        <div className="space-y-3">
         {groups.map(g => {
           const managedCount = g.rooms.filter(r => r.managed).length
           const allManaged = managedCount === g.rooms.length
@@ -96,6 +104,7 @@ export default function Configure({ onManagedChange }: { onManagedChange: () => 
           )
         })}
       </div>
+      )}
     </section>
   )
 }

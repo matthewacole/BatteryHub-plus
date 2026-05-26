@@ -102,7 +102,13 @@ export default function Settings({ onManagedBuildingsChange, forceMode, onForceM
 
   return (
     <div className="max-w-2xl">
-      <h2 className="text-xl font-semibold mb-6">Settings</h2>
+      <div className="flex items-center justify-between mb-6">
+        <h2 className="text-xl font-semibold">Settings</h2>
+        <div className="flex items-center gap-1.5 text-xs text-neutral-400">
+          <span>⚡BatteryHub+</span>
+          <span className="text-neutral-300">v1.4.0</span>
+        </div>
+      </div>
       <section className="mb-8">
         <h3 className="text-sm font-medium text-neutral-500 uppercase tracking-wider mb-3">Display Mode</h3>
         <div className="bg-white rounded-xl border border-border-light p-5 shadow-sm">
@@ -126,10 +132,7 @@ export default function Settings({ onManagedBuildingsChange, forceMode, onForceM
           </p>
         </div>
       </section>
-      <section className="mb-8">
-        <div className="text-xs text-neutral-400 text-right">v1.4.0</div>
-      </section>
-       {message && (
+      {message && (
         <div className={`mb-4 px-4 py-2 rounded-xl text-sm ${
           message.type === 'success' ? 'bg-ai-green/5 text-ai-green border border-ai-green/20' : 'bg-ai-pink/5 text-ai-pink border border-ai-pink/20'
         }`}>

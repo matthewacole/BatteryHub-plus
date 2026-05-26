@@ -41,7 +41,8 @@ export default function Dashboard({ buildingFilter, onBuildingFilter, buildings 
         <div className="text-neutral-400 text-sm py-8 text-center">Loading schedules...</div>
       ) : schedules.length === 0 ? (
         <div className="text-neutral-400 text-sm py-8 text-center">
-          No schedules found. Import a weekly Excel file in Settings.
+          <div className="text-lg mb-2">⚡BatteryHub+</div>
+          <p>No schedules found yet. Import a weekly Excel file in Settings.</p>
         </div>
       ) : (
         <div className="overflow-auto max-h-[calc(100vh-220px)]">
