@@ -234,7 +234,7 @@ export default function BatteryCheck({ buildingFilter, onBuildingFilter, buildin
       )}
 
       {weekDates.length > 0 && (
-        <div className="flex gap-2 mb-4">
+        <div className="flex gap-2 mb-4 overflow-x-auto flex-nowrap pb-1">
           {weekDates.map(d => {
             const label = new Date(d + 'T12:00:00').toLocaleDateString('en', { weekday: 'short', day: 'numeric' })
             const isSelected = d === selectedDate
