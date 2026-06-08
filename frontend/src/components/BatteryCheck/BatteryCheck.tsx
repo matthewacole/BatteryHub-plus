@@ -207,7 +207,8 @@ export default function BatteryCheck({ buildingFilter, onBuildingFilter, buildin
     if (w) { w.document.write(html); w.document.close(); setTimeout(() => w.print(), 500) }
   }
 
-  const todayTasks = todaysChecks.filter(c => c.completed === 0)
+  const pendingTasks = todaysChecks.filter(c => c.completed === 0)
+  const completedTasks = todaysChecks.filter(c => c.completed === 1)
 
   return (
     <div className="h-full flex flex-col overflow-hidden">
@@ -279,80 +280,119 @@ export default function BatteryCheck({ buildingFilter, onBuildingFilter, buildin
         <>
           {/* Mobile: schedule OR tasks, not both */}
           <div className="flex-1 min-h-0 overflow-hidden md:hidden">
-            {mobileView === 'schedule' && todayTasks.length > 0 && (
+            {mobileView === 'schedule' && pendingTasks.length > 0 && (
               <div className="h-full flex flex-col overflow-hidden">
                 <h3 className="text-sm font-medium text-neutral-500 mb-3">📅 Today's Schedule — Battery Check Rooms</h3>
                 <div className="flex-1 min-h-0 overflow-hidden">
-                  <BatteryCheckDayGrid schedules={todaySchedules} pendingChecks={todayTasks} />
+                  <BatteryCheckDayGrid schedules={todaySchedules} pendingChecks={pendingTasks} />
                 </div>
               </div>
             )}
-            {mobileView === 'schedule' && todayTasks.length === 0 && (
+            {mobileView === 'schedule' && pendingTasks.length === 0 && (
               <div className="text-neutral-400 text-sm py-4 text-center">No battery check rooms scheduled for this day.</div>
             )}
             {mobileView === 'tasks' && (
               <div className="h-full overflow-y-auto space-y-4">
                 <section>
                   <h3 className="text-sm font-medium text-neutral-500 mb-3">🔍 Tonight's Tasks</h3>
-                  {todayTasks.length === 0 ? (
+                  {pendingTasks.length === 0 ? (
                     <p className="text-sm text-neutral-400 py-3">No tasks for tonight.</p>
                   ) : (
                     <div className="space-y-2">
-                      {todayTasks.map(c => {
+                      {pendingTasks.map(c => {
                         const meta = REASON_LABELS[c.reason] || { icon: '•', action: c.reason }
                         return (
-                          <div key={c.id} className={`bg-card rounded-xl border px-4 py-3 flex items-center justify-between shadow-sm ${c.completed ? 'border-ai-green/30 bg-ai-green/5' : 'border-border-light'}`}>
+                          <div key={c.id} className="bg-card rounded-xl border border-border-light px-4 py-3 flex items-center justify-between shadow-sm">
                             <div className="flex items-center gap-3 cursor-pointer" onClick={() => setSelectedCheck(c)}>
                               <span className="text-lg">{meta.icon}</span>
                               <div>
-                                <div className={`font-medium ${c.completed ? 'text-neutral-400 line-through' : 'text-neutral-800'}`}>{meta.action} in {c.room}</div>
+                                <div className="font-medium text-neutral-800">{meta.action} in {c.room}</div>
                                 <div className="text-xs text-neutral-400">{c.building}</div>
                                 {c.class_names && <div className="text-xs text-neutral-500 mt-0.5">{c.class_names}</div>}
                               </div>
                             </div>
-                            {c.completed ? (
-                              <span className="text-xs text-green-600 font-medium">Done</span>
-                            ) : (
-                              <button onClick={() => handleComplete(c.id)} className="text-xs px-3 py-1.5 rounded-full bg-surface-tertiary text-neutral-500 hover:bg-ai-green/10 hover:text-ai-green transition-colors">
-                                Mark Complete
-                              </button>
-                            )}
+                            <button onClick={() => handleComplete(c.id)} className="text-xs px-3 py-1.5 rounded-full bg-surface-tertiary text-neutral-500 hover:bg-ai-green/10 hover:text-ai-green transition-colors">
+                              Mark Complete
+                            </button>
                           </div>
                         )
                       })}
                     </div>
                   )}
                 </section>
-                {yesterdaysChecks.length > 0 && (
+                {completedTasks.length > 0 && (
                   <section>
-                    <h3 className="text-sm font-medium text-neutral-500 mb-3">🔍 This Morning's Follow-up</h3>
-                    <div className="space-y-2">
-                      {yesterdaysChecks.map(c => {
+                    <h3 className="text-sm font-medium text-ai-green mb-3">✅ Completed</h3>
+                    <div className="space-y-2 opacity-60">
+                      {completedTasks.map(c => {
                         const meta = REASON_LABELS[c.reason] || { icon: '•', action: c.reason }
                         return (
-                          <div key={c.id} className={`bg-card rounded-xl border px-4 py-3 flex items-center justify-between shadow-sm ${c.completed ? 'border-ai-green/30 bg-ai-green/5' : 'border-ai-pink/30 bg-ai-pink/5'}`}>
+                          <div key={c.id} className="bg-card rounded-xl border border-ai-green/30 bg-ai-green/5 px-4 py-3 flex items-center justify-between shadow-sm">
                             <div className="flex items-center gap-3">
-                              <span className="text-lg">{c.completed ? '✅' : '❌'}</span>
+                              <span className="text-lg">✅</span>
                               <div>
-                                <div className={`font-medium ${c.completed ? 'text-green-700' : 'text-red-700'}`}>
-                                  {c.completed ? `${meta.action} in ${c.room} — done` : `${meta.action} in ${c.room} — was due!`}
-                                </div>
-                                <div className="text-xs text-neutral-400">{c.building} — was due {c.date}</div>
+                                <div className="font-medium text-neutral-400 line-through">{meta.action} in {c.room}</div>
+                                <div className="text-xs text-neutral-400">{c.building}</div>
                                 {c.class_names && <div className="text-xs text-neutral-500 mt-0.5">{c.class_names}</div>}
                               </div>
                             </div>
-                            {!c.completed && (
-                              <button onClick={() => handleComplete(c.id)} className="text-xs px-3 py-1.5 rounded-full bg-ai-pink/10 text-ai-pink hover:bg-ai-green/10 hover:text-ai-green transition-colors">
-                                Mark Complete
-                              </button>
-                            )}
+                            <span className="text-xs text-green-600 font-medium">Done</span>
                           </div>
                         )
                       })}
                     </div>
                   </section>
                 )}
-                {todayTasks.length === 0 && yesterdaysChecks.length === 0 && (
+                {yesterdaysChecks.length > 0 && (
+                  <section>
+                    <h3 className="text-sm font-medium text-neutral-500 mb-3">🔍 This Morning's Follow-up</h3>
+                    <div className="space-y-2">
+                      {(() => {
+                        const yesterdayPending = yesterdaysChecks.filter(c => c.completed === 0)
+                        const yesterdayDone = yesterdaysChecks.filter(c => c.completed === 1)
+                        return (
+                          <>
+                            {yesterdayPending.map(c => {
+                              const meta = REASON_LABELS[c.reason] || { icon: '•', action: c.reason }
+                              return (
+                                <div key={c.id} className="bg-card rounded-xl border border-ai-pink/30 bg-ai-pink/5 px-4 py-3 flex items-center justify-between shadow-sm">
+                                  <div className="flex items-center gap-3">
+                                    <span className="text-lg">❌</span>
+                                    <div>
+                                      <div className="font-medium text-red-700">{meta.action} in {c.room} — was due!</div>
+                                      <div className="text-xs text-neutral-400">{c.building} — was due {c.date}</div>
+                                      {c.class_names && <div className="text-xs text-neutral-500 mt-0.5">{c.class_names}</div>}
+                                    </div>
+                                  </div>
+                                  <button onClick={() => handleComplete(c.id)} className="text-xs px-3 py-1.5 rounded-full bg-ai-pink/10 text-ai-pink hover:bg-ai-green/10 hover:text-ai-green transition-colors">
+                                    Mark Complete
+                                  </button>
+                                </div>
+                              )
+                            })}
+                            {yesterdayDone.map(c => {
+                              const meta = REASON_LABELS[c.reason] || { icon: '•', action: c.reason }
+                              return (
+                                <div key={c.id} className="bg-card rounded-xl border border-ai-green/30 bg-ai-green/5 px-4 py-3 flex items-center justify-between shadow-sm opacity-60">
+                                  <div className="flex items-center gap-3">
+                                    <span className="text-lg">✅</span>
+                                    <div>
+                                      <div className="font-medium text-neutral-400 line-through">{meta.action} in {c.room} — done</div>
+                                      <div className="text-xs text-neutral-400">{c.building} — was due {c.date}</div>
+                                      {c.class_names && <div className="text-xs text-neutral-500 mt-0.5">{c.class_names}</div>}
+                                    </div>
+                                  </div>
+                                  <span className="text-xs text-green-600 font-medium">Done</span>
+                                </div>
+                              )
+                            })}
+                          </>
+                        )
+                      })()}
+                    </div>
+                  </section>
+                )}
+                {todaysChecks.length === 0 && yesterdaysChecks.length === 0 && (
                   <div className="text-neutral-400 text-sm py-4 text-center">All caught up for this day.</div>
                 )}
               </div>
@@ -361,76 +401,115 @@ export default function BatteryCheck({ buildingFilter, onBuildingFilter, buildin
 
           {/* Desktop: side-by-side schedule + tasks */}
           <div className="hidden md:flex flex-1 min-h-0 gap-6 overflow-hidden">
-            {todayTasks.length > 0 && (
+            {pendingTasks.length > 0 && (
               <div className="flex-1 min-h-0 overflow-hidden flex flex-col">
                 <h3 className="text-sm font-medium text-neutral-500 mb-3">📅 Today's Schedule — Battery Check Rooms</h3>
                 <div className="flex-1 min-h-0 overflow-hidden">
-                  <BatteryCheckDayGrid schedules={todaySchedules} pendingChecks={todayTasks} />
+                  <BatteryCheckDayGrid schedules={todaySchedules} pendingChecks={pendingTasks} />
                 </div>
               </div>
             )}
             <div className="flex-1 min-h-0 overflow-y-auto space-y-6">
               <section>
                 <h3 className="text-sm font-medium text-neutral-500 mb-3">🔍 Tonight's Tasks</h3>
-                {todayTasks.length === 0 ? (
+                {pendingTasks.length === 0 ? (
                   <p className="text-sm text-neutral-400 py-3">No tasks for tonight.</p>
                 ) : (
                   <div className="space-y-2">
-                    {todayTasks.map(c => {
+                    {pendingTasks.map(c => {
                       const meta = REASON_LABELS[c.reason] || { icon: '•', action: c.reason }
                       return (
-                        <div key={c.id} className={`bg-card rounded-xl border px-4 py-3 flex items-center justify-between shadow-sm ${c.completed ? 'border-ai-green/30 bg-ai-green/5' : 'border-border-light'}`}>
+                        <div key={c.id} className="bg-card rounded-xl border border-border-light px-4 py-3 flex items-center justify-between shadow-sm">
                           <div className="flex items-center gap-3 cursor-pointer" onClick={() => setSelectedCheck(c)}>
                             <span className="text-lg">{meta.icon}</span>
                             <div>
-                              <div className={`font-medium ${c.completed ? 'text-neutral-400 line-through' : 'text-neutral-800'}`}>{meta.action} in {c.room}</div>
+                              <div className="font-medium text-neutral-800">{meta.action} in {c.room}</div>
                               <div className="text-xs text-neutral-400">{c.building}</div>
                               {c.class_names && <div className="text-xs text-neutral-500 mt-0.5">{c.class_names}</div>}
                             </div>
                           </div>
-                          {c.completed ? (
-                            <span className="text-xs text-green-600 font-medium">Done</span>
-                          ) : (
-                            <button onClick={() => handleComplete(c.id)} className="text-xs px-3 py-1.5 rounded-full bg-surface-tertiary text-neutral-500 hover:bg-ai-green/10 hover:text-ai-green transition-colors">
-                              Mark Complete
-                            </button>
-                          )}
+                          <button onClick={() => handleComplete(c.id)} className="text-xs px-3 py-1.5 rounded-full bg-surface-tertiary text-neutral-500 hover:bg-ai-green/10 hover:text-ai-green transition-colors">
+                            Mark Complete
+                          </button>
                         </div>
                       )
                     })}
                   </div>
                 )}
               </section>
-              {yesterdaysChecks.length > 0 && (
+              {completedTasks.length > 0 && (
                 <section>
-                  <h3 className="text-sm font-medium text-neutral-500 mb-3">🔍 This Morning's Follow-up</h3>
-                  <div className="space-y-2">
-                    {yesterdaysChecks.map(c => {
+                  <h3 className="text-sm font-medium text-ai-green mb-3">✅ Completed</h3>
+                  <div className="space-y-2 opacity-60">
+                    {completedTasks.map(c => {
                       const meta = REASON_LABELS[c.reason] || { icon: '•', action: c.reason }
                       return (
-                        <div key={c.id} className={`bg-card rounded-xl border px-4 py-3 flex items-center justify-between shadow-sm ${c.completed ? 'border-ai-green/30 bg-ai-green/5' : 'border-ai-pink/30 bg-ai-pink/5'}`}>
+                        <div key={c.id} className="bg-card rounded-xl border border-ai-green/30 bg-ai-green/5 px-4 py-3 flex items-center justify-between shadow-sm">
                           <div className="flex items-center gap-3">
-                            <span className="text-lg">{c.completed ? '✅' : '❌'}</span>
+                            <span className="text-lg">✅</span>
                             <div>
-                              <div className={`font-medium ${c.completed ? 'text-green-700' : 'text-red-700'}`}>
-                                {c.completed ? `${meta.action} in ${c.room} — done` : `${meta.action} in ${c.room} — was due!`}
-                              </div>
-                              <div className="text-xs text-neutral-400">{c.building} — was due {c.date}</div>
+                              <div className="font-medium text-neutral-400 line-through">{meta.action} in {c.room}</div>
+                              <div className="text-xs text-neutral-400">{c.building}</div>
                               {c.class_names && <div className="text-xs text-neutral-500 mt-0.5">{c.class_names}</div>}
                             </div>
                           </div>
-                          {!c.completed && (
-                            <button onClick={() => handleComplete(c.id)} className="text-xs px-3 py-1.5 rounded-full bg-ai-pink/10 text-ai-pink hover:bg-ai-green/10 hover:text-ai-green transition-colors">
-                              Mark Complete
-                            </button>
-                          )}
+                          <span className="text-xs text-green-600 font-medium">Done</span>
                         </div>
                       )
                     })}
                   </div>
                 </section>
               )}
-              {todayTasks.length === 0 && yesterdaysChecks.length === 0 && (
+              {yesterdaysChecks.length > 0 && (
+                <section>
+                  <h3 className="text-sm font-medium text-neutral-500 mb-3">🔍 This Morning's Follow-up</h3>
+                  <div className="space-y-2">
+                    {(() => {
+                      const yesterdayPending = yesterdaysChecks.filter(c => c.completed === 0)
+                      const yesterdayDone = yesterdaysChecks.filter(c => c.completed === 1)
+                      return (
+                        <>
+                          {yesterdayPending.map(c => {
+                            const meta = REASON_LABELS[c.reason] || { icon: '•', action: c.reason }
+                            return (
+                              <div key={c.id} className="bg-card rounded-xl border border-ai-pink/30 bg-ai-pink/5 px-4 py-3 flex items-center justify-between shadow-sm">
+                                <div className="flex items-center gap-3">
+                                  <span className="text-lg">❌</span>
+                                  <div>
+                                    <div className="font-medium text-red-700">{meta.action} in {c.room} — was due!</div>
+                                    <div className="text-xs text-neutral-400">{c.building} — was due {c.date}</div>
+                                    {c.class_names && <div className="text-xs text-neutral-500 mt-0.5">{c.class_names}</div>}
+                                  </div>
+                                </div>
+                                <button onClick={() => handleComplete(c.id)} className="text-xs px-3 py-1.5 rounded-full bg-ai-pink/10 text-ai-pink hover:bg-ai-green/10 hover:text-ai-green transition-colors">
+                                  Mark Complete
+                                </button>
+                              </div>
+                            )
+                          })}
+                          {yesterdayDone.map(c => {
+                            const meta = REASON_LABELS[c.reason] || { icon: '•', action: c.reason }
+                            return (
+                              <div key={c.id} className="bg-card rounded-xl border border-ai-green/30 bg-ai-green/5 px-4 py-3 flex items-center justify-between shadow-sm opacity-60">
+                                <div className="flex items-center gap-3">
+                                  <span className="text-lg">✅</span>
+                                  <div>
+                                    <div className="font-medium text-neutral-400 line-through">{meta.action} in {c.room} — done</div>
+                                    <div className="text-xs text-neutral-400">{c.building} — was due {c.date}</div>
+                                    {c.class_names && <div className="text-xs text-neutral-500 mt-0.5">{c.class_names}</div>}
+                                  </div>
+                                </div>
+                                <span className="text-xs text-green-600 font-medium">Done</span>
+                              </div>
+                            )
+                          })}
+                        </>
+                      )
+                    })()}
+                  </div>
+                </section>
+              )}
+              {todaysChecks.length === 0 && yesterdaysChecks.length === 0 && (
                 <div className="text-neutral-400 text-sm py-4 text-center">All caught up for this day.</div>
               )}
             </div>
