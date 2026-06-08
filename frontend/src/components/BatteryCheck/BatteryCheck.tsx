@@ -21,12 +21,21 @@ export default function BatteryCheck({ buildingFilter, onBuildingFilter, buildin
   const [inventory, setInventory] = useState<Inventory | null>(null)
   const [loading, setLoading] = useState(true)
   const [selectedCheck, setSelectedCheck] = useState<BCType | null>(null)
-  const [mobileView, setMobileView] = useState<'schedule' | 'tasks'>('schedule')
+  const [mobileView, setMobileView] = useState<'schedule' | 'tasks'>('tasks')
 
   useEffect(() => {
     api.schedules.dates().then(dates => {
       setWeekDates(dates)
-      if (dates.length > 0 && !selectedDate) setSelectedDate(dates[0])
+      if (dates.length > 0 && !selectedDate) {
+        const today = new Date().toISOString().slice(0, 10)
+        const idx = dates.indexOf(today)
+        if (idx >= 0) {
+          setSelectedDate(today)
+        } else {
+          const next = dates.find(d => d >= today)
+          setSelectedDate(next || dates[dates.length - 1])
+        }
+      }
     }).catch(() => {})
     api.battery.inventory().then(setInventory).catch(() => {})
   }, [])
